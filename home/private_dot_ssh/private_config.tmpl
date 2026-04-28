@@ -1,0 +1,17 @@
+{{ if .enable_ssh_setup -}}
+Host github.com
+  AddKeysToAgent yes
+  IdentityFile ~/.ssh/id_ed25519
+
+Host *.platform.sh
+  AddKeysToAgent yes
+  IdentityFile ~/.ssh/id_ed25519
+
+Host *.ch-1.platform.sh
+  AddKeysToAgent yes
+  IdentityFile ~/.ssh/id_ed25519
+
+Host git.drupal.org
+  AddKeysToAgent yes
+  IdentityFile ~/.ssh/id_ed25519
+{{ end -}}

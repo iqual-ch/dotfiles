@@ -1,0 +1,82 @@
+{{- if and .enable_ssh_setup (eq .chezmoi.os "linux") -}}
+#!/bin/bash
+
+set -eufo pipefail
+
+SSH_KEY_PATH="$HOME/.ssh/id_ed25519"
+SSH_KEY_TITLE="$(hostname)-$(date +%Y%m%d)"
+LOCAL_BIN="$HOME/.local/bin"
+
+# Ensure local bin is on PATH for gh/upsun installed by chezmoi externals
+export PATH="$LOCAL_BIN:$PATH"
+
+echo "[ssh] Setting up SSH keys..."
+
+# --- Key Generation ---
+
+if [ -f "$SSH_KEY_PATH" ]; then
+    echo "[ssh] SSH key already exists at $SSH_KEY_PATH, skipping generation."
+else
+    echo "[ssh] Generating new SSH key..."
+    mkdir -p "$HOME/.ssh"
+    chmod 700 "$HOME/.ssh"
+    ssh-keygen -t ed25519 -C "{{ .email }}" -f "$SSH_KEY_PATH" -N ""
+    echo "[ssh] SSH key generated at $SSH_KEY_PATH"
+fi
+
+# Skip platform key uploads in non-interactive environments
+if [ -n "${CI:-}" ] || [ ! -t 0 ]; then
+    echo "[ssh] Non-interactive environment detected, skipping platform key uploads."
+    exit 0
+fi
+
+# --- GitHub SSH Key Upload ---
+
+if command -v gh &> /dev/null; then
+    printf "Add SSH key to GitHub? (y/N) "
+    read -r add_gh < /dev/tty
+    if [ "$add_gh" = "y" ] || [ "$add_gh" = "Y" ]; then
+        if ! gh auth status &> /dev/null; then
+            echo "[ssh] Not authenticated with GitHub CLI. Starting login..."
+            gh auth login || {
+                echo "[ssh] Warning: GitHub login failed, skipping key upload."
+                add_gh="n"
+            }
+        fi
+        if [ "$add_gh" = "y" ] || [ "$add_gh" = "Y" ]; then
+            echo "[ssh] Adding SSH key to GitHub with title '$SSH_KEY_TITLE'..."
+            gh ssh-key add "${SSH_KEY_PATH}.pub" --title "$SSH_KEY_TITLE" && \
+                echo "[ssh] SSH key added to GitHub." || \
+                echo "[ssh] Warning: Failed to add SSH key to GitHub (may already exist)."
+        fi
+    fi
+else
+    echo "[ssh] Note: gh CLI not found, skipping GitHub key upload."
+fi
+
+# --- Upsun SSH Key Upload ---
+
+if command -v upsun &> /dev/null; then
+    printf "Add SSH key to Upsun? (y/N) "
+    read -r add_upsun < /dev/tty
+    if [ "$add_upsun" = "y" ] || [ "$add_upsun" = "Y" ]; then
+        if ! upsun auth:info &> /dev/null; then
+            echo "[ssh] Not authenticated with Upsun CLI. Starting login..."
+            upsun auth:browser-login || {
+                echo "[ssh] Warning: Upsun login failed, skipping key upload."
+                add_upsun="n"
+            }
+        fi
+        if [ "$add_upsun" = "y" ] || [ "$add_upsun" = "Y" ]; then
+            echo "[ssh] Adding SSH key to Upsun with name '$SSH_KEY_TITLE'..."
+            upsun ssh-key:add "${SSH_KEY_PATH}.pub" --name="$SSH_KEY_TITLE" && \
+                echo "[ssh] SSH key added to Upsun." || \
+                echo "[ssh] Warning: Failed to add SSH key to Upsun (may already exist)."
+        fi
+    fi
+else
+    echo "[ssh] Note: upsun CLI not found, skipping Upsun key upload."
+fi
+
+echo "[ssh] SSH setup complete."
+{{ end -}}

@@ -1,0 +1,64 @@
+{{- if eq .chezmoi.os "linux" }}
+
+[".local/bin/age"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "FiloSottile/age" (printf "age-*-%s-%s.tar.gz" .chezmoi.os .chezmoi.arch) | quote }}
+    executable = true
+    path = "age/age"
+
+[".local/bin/age-keygen"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "FiloSottile/age" (printf "age-*-%s-%s.tar.gz" .chezmoi.os .chezmoi.arch) | quote }}
+    executable = true
+    path = "age/age-keygen"
+
+[".local/bin/gh"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "cli/cli" (printf "gh_*_%s_%s.tar.gz" .chezmoi.os .chezmoi.arch) | quote }}
+    executable = true
+    stripComponents = 1
+    path = "bin/gh"
+
+[".local/bin/upsun"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "platformsh/cli" (printf "upsun_*_%s_%s.tar.gz" .chezmoi.os .chezmoi.arch) | quote }}
+    executable = true
+    path = "upsun"
+
+[".local/bin/fzf"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "junegunn/fzf" (printf "fzf-*-%s_%s.tar.gz" .chezmoi.os .chezmoi.arch) | quote }}
+    executable = true
+    path = "fzf"
+
+[".local/bin/yq"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "mikefarah/yq" (printf "yq_%s_%s.tar.gz" .chezmoi.os .chezmoi.arch) | quote }}
+    executable = true
+    path = {{ printf "./yq_%s_%s" .chezmoi.os .chezmoi.arch | quote }}
+
+[".local/bin/xq"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "sibprogrammer/xq" (printf "xq_*_%s_%s.tar.gz" .chezmoi.os .chezmoi.arch) | quote }}
+    executable = true
+    path = "xq"
+
+{{- if .enable_mise }}
+
+[".local/bin/mise"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "jdx/mise" (printf "mise-*-%s-%s.tar.gz" .chezmoi.os (replace .chezmoi.arch "amd64" "x64")) | quote }}
+    executable = true
+    path = "mise/bin/mise"
+{{- end }}
+
+{{- if .enable_runme }}
+
+[".local/bin/runme"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "runmedev/runme" (printf "runme_%s_%s.tar.gz" .chezmoi.os (replace .chezmoi.arch "amd64" "x86_64")) | quote }}
+    executable = true
+    path = "runme"
+{{- end }}
+
+{{- end }}

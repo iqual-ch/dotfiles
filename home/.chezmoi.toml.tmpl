@@ -1,0 +1,18 @@
+{{- $github_username := promptStringOnce . "github_username" "GitHub username" -}}
+{{- $email := promptStringOnce . "email" "Email address (for git)" -}}
+{{- $enable_ssh_setup := promptBoolOnce . "enable_ssh_setup" "Manage SSH config and generate keys" true -}}
+{{- $enable_mise := promptBoolOnce . "enable_mise" "Install mise (tool version manager)" true -}}
+{{- $enable_runme := promptBoolOnce . "enable_runme" "Install Runme (runnable markdown)" false -}}
+{{- $enable_ddev_wrappers := promptBoolOnce . "enable_ddev_wrappers" "Enable DDEV-aware shell wrappers (php, composer, npm, etc.)" false -}}
+{{- $enable_idp_helpers := promptBoolOnce . "enable_idp_helpers" "Enable IDP helper aliases (m=make, c=code)" false -}}
+{{- $enable_upsun_helpers := promptBoolOnce . "enable_upsun_helpers" "Enable Upsun helpers (pssh)" false -}}
+
+[data]
+github_username = {{ $github_username | quote }}
+email = {{ $email | quote }}
+enable_ssh_setup = {{ $enable_ssh_setup }}
+enable_mise = {{ $enable_mise }}
+enable_runme = {{ $enable_runme }}
+enable_ddev_wrappers = {{ $enable_ddev_wrappers }}
+enable_idp_helpers = {{ $enable_idp_helpers }}
+enable_upsun_helpers = {{ $enable_upsun_helpers }}

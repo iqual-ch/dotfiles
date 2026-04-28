@@ -1,0 +1,82 @@
+name: Test dotfiles
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "home/**"
+      - "tests/**"
+      - "Dockerfile"
+      - ".github/workflows/test.yaml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "home/**"
+      - "tests/**"
+      - "Dockerfile"
+      - ".github/workflows/test.yaml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build test container
+        run: docker build -t dotfiles-test .
+
+      - name: Run BATS tests (all features enabled)
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/home/developer/.local/share/chezmoi" \
+            -e CHEZMOI_CONFIG='[data]
+          github_username = "testuser"
+          email = "test@example.com"
+          enable_ssh_setup = true
+          enable_mise = true
+          enable_runme = true
+          enable_ddev_wrappers = true
+          enable_idp_helpers = true
+          enable_upsun_helpers = true' \
+            dotfiles-test \
+            bash -c '
+              mkdir -p ~/.config/chezmoi
+              echo "$CHEZMOI_CONFIG" > ~/.config/chezmoi/chezmoi.toml
+              chezmoi init --no-tty
+              chezmoi apply --no-tty --force
+              cd ~/.local/share/chezmoi
+              bats tests/
+            '
+
+      - name: Test with minimal features (all opt-ins disabled)
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/home/developer/.local/share/chezmoi" \
+            -e CHEZMOI_CONFIG='[data]
+          github_username = "testuser"
+          email = "test@example.com"
+          enable_ssh_setup = false
+          enable_mise = false
+          enable_runme = false
+          enable_ddev_wrappers = false
+          enable_idp_helpers = false
+          enable_upsun_helpers = false' \
+            dotfiles-test \
+            bash -c '
+              mkdir -p ~/.config/chezmoi
+              echo "$CHEZMOI_CONFIG" > ~/.config/chezmoi/chezmoi.toml
+              chezmoi init --no-tty
+              chezmoi apply --no-tty --force
+              echo "--- Minimal dotfiles applied successfully ---"
+              # Verify opt-in files are NOT present
+              test ! -f ~/.bashrc.d/ddev-wrappers.sh
+              test ! -f ~/.bashrc.d/idp-helpers.sh
+              test ! -f ~/.bashrc.d/upsun-helpers.sh
+              test ! -f ~/.config/mise/config.toml
+              test ! -f ~/.ssh/config
+              echo "Opt-in exclusions verified."
+            '

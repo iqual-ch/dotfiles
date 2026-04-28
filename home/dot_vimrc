@@ -1,0 +1,12 @@
+" Enable syntax highlighting
+syntax on
+
+" disable use of the mouse for all modes
+set mouse=
+
+" Display line numbers on the left
+set number
+
+set pastetoggle=<F2>
+
+colorscheme default

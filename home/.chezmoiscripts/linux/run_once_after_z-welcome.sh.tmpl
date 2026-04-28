@@ -1,0 +1,50 @@
+{{- if eq .chezmoi.os "linux" -}}
+#!/bin/bash
+
+# Skip in non-interactive environments
+if [ -n "${CI:-}" ] || [ ! -t 0 ]; then
+    exit 0
+fi
+
+echo ""
+echo "==========================================="
+echo "  👋 Hi {{ .github_username }}!"
+echo "==========================================="
+echo ""
+echo "  Your developer environment is ready."
+echo ""
+
+{{ if (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
+missing=()
+
+if ! command -v docker &>/dev/null; then
+    missing+=("docker  → Install Docker Desktop for Windows and enable WSL2 integration")
+fi
+
+if ! command -v ddev &>/dev/null; then
+    missing+=("ddev    → Install DDEV via Windows: https://ddev.readthedocs.io/en/stable/users/install/ddev-installation/")
+fi
+
+if ! command -v code &>/dev/null; then
+    missing+=("code    → Install VS Code for Windows and enable the WSL extension")
+fi
+
+if [ ${#missing[@]} -gt 0 ]; then
+    echo "  ⚠  The following tools are not yet available in WSL:"
+    echo ""
+    for item in "${missing[@]}"; do
+        echo "     • $item"
+    done
+    echo ""
+    echo "  These are installed through Windows and should"
+    echo "  be available in WSL after installation + restart."
+    echo ""
+fi
+{{ end -}}
+
+echo "  Run 'chezmoi update' to pull the latest config."
+echo "  Run 'chezmoi edit-config' to change your settings."
+echo ""
+echo "==========================================="
+echo ""
+{{ end -}}

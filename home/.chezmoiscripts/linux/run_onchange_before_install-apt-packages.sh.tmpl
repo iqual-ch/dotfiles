@@ -1,0 +1,25 @@
+{{- if eq .chezmoi.os "linux" -}}
+
+{{- $aptPackages := list -}}
+{{- range .packages.apt -}}
+    {{- $aptPackages = append $aptPackages . -}}
+{{- end -}}
+
+{{- $sudo := "sudo " -}}
+{{- if eq .chezmoi.username "root" -}}
+    {{- $sudo = "" -}}
+{{- end -}}
+
+#!/bin/bash
+
+set -eufo pipefail
+
+echo "[apt] Updating package lists and installing packages..."
+
+{{ if $aptPackages -}}
+echo "Installing: {{ $aptPackages | join ", " }}"
+
+{{ $sudo }}apt-get update -qq
+{{ $sudo }}apt-get install -y -qq {{ $aptPackages | join " " }}
+{{ end -}}
+{{ end -}}

@@ -1,0 +1,15 @@
+[user]
+	email = {{ .email | quote }}
+	name = {{ .github_username | quote }}
+[init]
+	defaultBranch = main
+[pull]
+	rebase = true
+{{- $ghPath := lookPath "gh" }}
+{{- if $ghPath }}
+[credential "https://github.com"]
+	helper = !{{ $ghPath }} auth git-credential
+[credential "https://gist.github.com"]
+	helper = !{{ $ghPath }} auth git-credential
+{{- end }}
+{{/* vim: set filetype=gitconfig: */}}

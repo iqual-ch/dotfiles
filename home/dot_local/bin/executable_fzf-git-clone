@@ -1,0 +1,90 @@
+#!/bin/bash
+
+# fzf-git-clone: Clone a GitHub repository using fzf.
+# Shows a list of available repos and will clone selected
+# repo if it does not already exist in the GITHUB_DIR.
+#
+# Author: Martin Stadelmann
+#
+# Usage: fzf-git-clone
+# Output: Returns the directory path of the cloned repository.
+
+set -eufo pipefail
+
+# Base directory for local GitHub repositories.
+GITHUB_DIR="${GITHUB_DIR:-$HOME/github}"
+
+# Create temporary files.
+TMPFILE=$(mktemp) || { echo "Failed to create temporary file"; exit 1; }
+REMOTEFILE=$(mktemp) || { echo "Failed to create remote temporary file"; exit 1; }
+REMOTEFILE_ORG=$(mktemp) || { echo "Failed to create remote temporary file"; exit 1; }
+
+# Ensure that the temporary files are always deleted on exit.
+trap 'rm -f "$TMPFILE" "$REMOTEFILE" "$REMOTEFILE_ORG"' EXIT
+
+# Write the list of local repositories to TMPFILE,
+# appending a "Local" column using awk and fixing the width of the first column.
+if [ -d "$GITHUB_DIR" ]; then
+  find "$GITHUB_DIR" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; \
+    | sort -u \
+    | awk 'NF {printf "%-32s\tLocal\n", $0}' > "$TMPFILE"
+fi
+
+# Asynchronously fetch remote repositories in a subshell with job control disabled.
+(
+  {
+    remote=$(gh repo list --limit 1000 --no-archived --json nameWithOwner --jq '.[].nameWithOwner' 2>/dev/null)
+    if [ -n "$remote" ]; then
+      # Create remote entries with a "Clone" column.
+      echo "$remote" | awk -F/ '{printf "%-32s\tClone\t%s\n", $NF, $0}' \
+        | grep -vFf <(cut -f1 "$TMPFILE") > "$REMOTEFILE"
+      # Merge the remote entries into TMPFILE (sorting uniquely in place).
+      sort -u -o "$TMPFILE" "$TMPFILE" "$REMOTEFILE"
+    fi
+  } &>/dev/null &
+)
+
+# Asynchronously fetch remote repositories in a subshell with job control disabled.
+(
+  {
+    # Get the first organization login from your org list.
+    org=$(gh org list --limit 1 2>/dev/null | tail -1)
+    if [ -n "$org" ]; then
+      remote_org=$(gh repo list "$org" --limit 1000 --no-archived --json nameWithOwner --jq '.[].nameWithOwner' 2>/dev/null)
+      if [ -n "$remote_org" ]; then
+        echo "$remote_org" | awk -F/ '{printf "%-32s\tClone\t%s\n", $NF, $0}' \
+          | grep -vFf <(cut -f1 "$TMPFILE") >> "$REMOTEFILE_ORG"
+        sort -u -o "$TMPFILE" "$TMPFILE" "$REMOTEFILE_ORG"
+        rm -f "$REMOTEFILE_ORG"
+      fi
+    fi
+  } &>/dev/null &
+)
+
+# Launch fzf with reload bindings.
+# - The 'load' binding waits 1 second then reloads the list and unbinds itself.
+# - The 'change' binding reloads the list on every keystroke.
+selection=$(fzf \
+  -i \
+  --with-nth=1,2,3 \
+  --delimiter='\t' \
+  --bind "load:reload-sync(sleep 1; cat $TMPFILE; sleep 3; cat $TMPFILE)+unbind(load)" \
+  --bind "change:reload:cat $TMPFILE" \
+  < "$TMPFILE") || exit 1
+
+# Parse the selection:
+# Field 1: repo_name, Field 2: status, Field 3: full repo (if remote).
+repo_name=$(echo "$selection" | awk -F'\t' '{gsub(/^[ \t]+|[ \t]+$/, "", $1); print $1}')
+status=$(echo "$selection" | awk -F'\t' '{print $2}')
+full_repo=$(echo "$selection" | awk -F'\t' '{print $3}')
+
+target_dir="$GITHUB_DIR/$repo_name"
+
+# If the repository is marked as "Clone", clone it.
+if [ "$status" = "Clone" ]; then
+  echo "Cloning repository $full_repo into $target_dir..." >&2
+  mkdir -p "$GITHUB_DIR" || exit 1
+  gh repo clone "$full_repo" "$target_dir" >&2 || exit 1
+fi
+
+printf "$target_dir"

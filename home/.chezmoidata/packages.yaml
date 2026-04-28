@@ -1,0 +1,13 @@
+packages:
+  apt:
+    - "make"
+    - "git"
+    - "socat"
+    - "openssh-client"
+    - "curl"
+    - "wget"
+    - "jq"
+    - "bat"
+    - "shellcheck"
+    - "ripgrep"
+    - "zstd"

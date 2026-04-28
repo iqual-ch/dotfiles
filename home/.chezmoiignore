@@ -1,0 +1,15 @@
+{{- if not .enable_ddev_wrappers }}
+.bashrc.d/ddev-wrappers.sh
+{{- end }}
+{{- if not .enable_idp_helpers }}
+.bashrc.d/idp-helpers.sh
+{{- end }}
+{{- if not .enable_upsun_helpers }}
+.bashrc.d/upsun-helpers.sh
+{{- end }}
+{{- if not .enable_mise }}
+.config/mise/config.toml
+{{- end }}
+{{- if not .enable_ssh_setup }}
+.ssh/config
+{{- end }}
