@@ -47,7 +47,7 @@
 
 @test "SSH config covers platform.sh and upsun" {
     grep -q "platform.sh" "${HOME}/.ssh/config"
-    grep -q "upsun.site" "${HOME}/.ssh/config"
+    grep -q "upsun.com" "${HOME}/.ssh/config"
 }
 
 @test "SSH config covers Drupal Code gitlab" {
