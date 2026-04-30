@@ -10,4 +10,5 @@ packages:
     - "bat"
     - "shellcheck"
     - "ripgrep"
+    - "dnsutils"
     - "zstd"
