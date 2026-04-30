@@ -38,8 +38,15 @@ if command -v gh &> /dev/null; then
     if [ "$add_gh" = "y" ] || [ "$add_gh" = "Y" ]; then
         if ! gh auth status &> /dev/null; then
             echo "[ssh] Not authenticated with GitHub CLI. Starting login..."
-            gh auth login || {
+            gh auth login --web --git-protocol https --skip-ssh-key || {
                 echo "[ssh] Warning: GitHub login failed, skipping key upload."
+                add_gh="n"
+            }
+        fi
+        if [ "$add_gh" = "y" ] || [ "$add_gh" = "Y" ]; then
+            echo "[ssh] Requesting admin:public_key scope for key upload..."
+            gh auth refresh -s admin:public_key || {
+                echo "[ssh] Warning: Failed to request scope, skipping key upload."
                 add_gh="n"
             }
         fi
@@ -48,6 +55,8 @@ if command -v gh &> /dev/null; then
             gh ssh-key add "${SSH_KEY_PATH}.pub" --title "$SSH_KEY_TITLE" && \
                 echo "[ssh] SSH key added to GitHub." || \
                 echo "[ssh] Warning: Failed to add SSH key to GitHub (may already exist)."
+            echo "[ssh] Removing admin:public_key scope..."
+            gh auth refresh --remove-scopes admin:public_key 2>/dev/null || true
         fi
     fi
 else
