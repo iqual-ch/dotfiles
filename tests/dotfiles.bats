@@ -93,3 +93,26 @@
 @test "bashrc sources bash_aliases if present" {
     grep -q "bash_aliases" "${HOME}/.bashrc"
 }
+
+@test "all optional features are enabled by default" {
+    local repo="${BATS_TEST_DIRNAME}/.."
+    local tmp_home
+    tmp_home="$(mktemp -d)"
+    run env HOME="${tmp_home}" chezmoi execute-template --init \
+        --promptString github_username=x,email=y \
+        --file "${repo}/home/.chezmoi.toml.tmpl"
+    rm -rf "${tmp_home}"
+    [ "$status" -eq 0 ]
+    for flag in enable_ssh_setup enable_mise enable_runme enable_ddev_wrappers enable_idp_helpers enable_upsun_helpers; do
+        echo "$output" | grep -q "^${flag} = true$"
+    done
+}
+
+@test "SSH key upload prompts default to yes" {
+    local repo="${BATS_TEST_DIRNAME}/.."
+    run chezmoi execute-template --file "${repo}/home/.chezmoiscripts/linux/run_once_after_setup-ssh-key.sh.tmpl"
+    [ "$status" -eq 0 ]
+    echo "$output" | grep -q "Add SSH key to GitHub? (Y/n)"
+    echo "$output" | grep -q "Add SSH key to Upsun? (Y/n)"
+    ! echo "$output" | grep -q "(y/N)"
+}

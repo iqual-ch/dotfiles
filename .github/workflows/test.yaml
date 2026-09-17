@@ -52,7 +52,7 @@ jobs:
               bats tests/
             '
 
-      - name: Test with minimal features (all opt-ins disabled)
+      - name: Test with minimal features (all optional features disabled)
         run: |
           docker run --rm \
             -v "${{ github.workspace }}:/home/developer/.local/share/chezmoi" \
@@ -72,11 +72,11 @@ jobs:
               chezmoi init --no-tty
               chezmoi apply --no-tty --force
               echo "--- Minimal dotfiles applied successfully ---"
-              # Verify opt-in files are NOT present
+              # Verify optional files are NOT present
               test ! -f ~/.bashrc.d/ddev-wrappers.sh
               test ! -f ~/.bashrc.d/idp-helpers.sh
               test ! -f ~/.bashrc.d/upsun-helpers.sh
               test ! -f ~/.config/mise/config.toml
               test ! -f ~/.ssh/config
-              echo "Opt-in exclusions verified."
+              echo "Optional feature exclusions verified."
             '
