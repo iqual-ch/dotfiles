@@ -33,9 +33,11 @@ fi
 # --- GitHub SSH Key Upload ---
 
 if command -v gh &> /dev/null; then
-    printf "Add SSH key to GitHub? (y/N) "
+    printf "Add SSH key to GitHub? (Y/n) "
     read -r add_gh < /dev/tty
-    if [ "$add_gh" = "y" ] || [ "$add_gh" = "Y" ]; then
+    # Default to yes: only an explicit "n" opts out
+    case "$add_gh" in [nN]*) add_gh="n" ;; *) add_gh="y" ;; esac
+    if [ "$add_gh" = "y" ]; then
         if ! gh auth status &> /dev/null; then
             echo "[ssh] Not authenticated with GitHub CLI. Starting login..."
             gh auth login --web --git-protocol https --skip-ssh-key --scopes admin:public_key || {
@@ -49,7 +51,7 @@ if command -v gh &> /dev/null; then
                 add_gh="n"
             }
         fi
-        if [ "$add_gh" = "y" ] || [ "$add_gh" = "Y" ]; then
+        if [ "$add_gh" = "y" ]; then
             echo "[ssh] Adding SSH key to GitHub with title '$SSH_KEY_TITLE'..."
             gh ssh-key add "${SSH_KEY_PATH}.pub" --title "$SSH_KEY_TITLE" && \
                 echo "[ssh] SSH key added to GitHub." || \
@@ -65,9 +67,11 @@ fi
 # --- Upsun SSH Key Upload ---
 
 if command -v upsun &> /dev/null; then
-    printf "Add SSH key to Upsun? (y/N) "
+    printf "Add SSH key to Upsun? (Y/n) "
     read -r add_upsun < /dev/tty
-    if [ "$add_upsun" = "y" ] || [ "$add_upsun" = "Y" ]; then
+    # Default to yes: only an explicit "n" opts out
+    case "$add_upsun" in [nN]*) add_upsun="n" ;; *) add_upsun="y" ;; esac
+    if [ "$add_upsun" = "y" ]; then
         if ! upsun auth:info &> /dev/null; then
             echo "[ssh] Not authenticated with Upsun CLI. Starting login..."
             upsun auth:browser-login || {
@@ -75,7 +79,7 @@ if command -v upsun &> /dev/null; then
                 add_upsun="n"
             }
         fi
-        if [ "$add_upsun" = "y" ] || [ "$add_upsun" = "Y" ]; then
+        if [ "$add_upsun" = "y" ]; then
             echo "[ssh] Adding SSH key to Upsun with name '$SSH_KEY_TITLE'..."
             upsun ssh-key:add "${SSH_KEY_PATH}.pub" --name="$SSH_KEY_TITLE" && \
                 echo "[ssh] SSH key added to Upsun." || \
