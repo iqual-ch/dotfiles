@@ -11,6 +11,7 @@ alias gcm='git commit -v -m'
 alias gco='git checkout'
 alias gob='git checkout -b'
 alias gd='git diff'
+alias gdc='git diff --cached'
 alias gf='git fetch'
 alias gm='git merge'
 alias gp='git push'
@@ -21,6 +22,17 @@ alias glog='git log'
 alias gg='git log --graph --pretty=format:'\''%C(bold)%h%Creset%C(magenta)%d%Creset %s %C(yellow)<%an> %C(cyan)(%cr)%Creset'\'' --abbrev-commit --date=relative'
 alias ggf='git log --graph --date=short --pretty=format:'\''%C(auto)%h %Cgreen%an%Creset %Cblue%cd%Creset %C(auto)%d %s'\'''
 alias ggs='gg --stat'
+
+# Copy the current git branch name to the clipboard
+gbx() {
+  local branch
+  branch=$(git branch --show-current) || return 1
+  if [ -z "$branch" ]; then
+    echo "Not on a branch (detached HEAD)" >&2
+    return 1
+  fi
+  printf '%s' "$branch" | clip
+}
 
 
 # fzf git: checkout branch with fuzzy finder

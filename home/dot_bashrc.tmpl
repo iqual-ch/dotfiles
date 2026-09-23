@@ -79,6 +79,13 @@ if command -v batcat &>/dev/null && ! command -v bat &>/dev/null; then
     alias bat='batcat'
 fi
 
+# clip: pipe stdin into the system clipboard (xclip; on WSL2 via WSLg),
+# dropping the trailing newline
+clip() {
+    command -v xclip &>/dev/null || { echo "xclip is not installed" >&2; return 1; }
+    xclip -selection clipboard -rmlastnl
+}
+
 # cd alias
 alias ..='cd ..'
 alias ...='cd ../..'

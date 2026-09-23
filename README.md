@@ -18,10 +18,10 @@ You will be asked for your **GitHub username** and **email** (used for git), the
 
 | Component | Details |
 |-----------|---------|
-| **APT packages** | `make`, `git`, `socat`, `openssh-client`, `curl`, `wget`, `jq`, `bat`, `shellcheck`, `ripgrep`, `dnsutils`, `zstd` |
+| **APT packages** | `make`, `git`, `socat`, `openssh-client`, `curl`, `wget`, `jq`, `bat`, `shellcheck`, `ripgrep`, `dnsutils`, `zstd`, `xclip` |
 | **CLI tools** | `gh` (GitHub), `upsun`, `age`, `yq`, `xq`, `fzf` — installed to `~/.local/bin` |
 | **Git** | Default branch `main`, pull with rebase, `gh` as credential helper, aliases (`gs`, `gc`, `gco`, `gp`, ...) and fzf-powered helpers like `fzf-git-clone` |
-| **Shell** | `~/.bashrc` with SSH agent auto-start, `~/.local/bin` on `PATH`, tool completions, `bat` → `batcat` alias |
+| **Shell** | `~/.bashrc` with SSH agent auto-start, `~/.local/bin` on `PATH`, tool completions, `bat` → `batcat` alias, `clip` to pipe into the clipboard |
 | **vim** | Syntax highlighting, line numbers, sensible defaults |
 
 ### Optional (enabled by default)
