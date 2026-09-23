@@ -1,8 +1,10 @@
-# DDEV-aware wrappers: auto-detect .ddev directories and route through DDEV.
+# DDEV-aware wrappers: auto-detect DDEV projects (.ddev/config.yaml) and route through DDEV.
+# Checks for the project config file rather than the .ddev directory so that
+# ~/.ddev (which only holds the global config) does not trigger the wrappers.
 # Falls back to native commands or Docker containers.
 
 php() {
-  if [ -d .ddev ]; then
+  if [ -f .ddev/config.yaml ]; then
     ddev php "$@"
   elif [ -n "$(type -P php)" ]; then
     command php "$@"
@@ -12,7 +14,7 @@ php() {
 }
 
 composer() {
-  if [ -d .ddev ]; then
+  if [ -f .ddev/config.yaml ]; then
     ddev composer "$@"
   elif [ -n "$(type -P composer)" ]; then
     command composer "$@"
@@ -22,7 +24,7 @@ composer() {
 }
 
 drush() {
-  if [ -d .ddev ]; then
+  if [ -f .ddev/config.yaml ]; then
     ddev drush "$@"
   elif [ -n "$(type -P drush)" ]; then
     command drush "$@"
@@ -32,7 +34,7 @@ drush() {
 }
 
 npm() {
-  if [ -d .ddev ]; then
+  if [ -f .ddev/config.yaml ]; then
     ddev npm "$@"
   elif [ -n "$(type -P npm)" ]; then
     command npm "$@"
@@ -42,7 +44,7 @@ npm() {
 }
 
 node() {
-  if [ -d .ddev ]; then
+  if [ -f .ddev/config.yaml ]; then
     ddev node "$@"
   elif [ -n "$(type -P node)" ]; then
     command node "$@"
@@ -52,7 +54,7 @@ node() {
 }
 
 bun() {
-  if [ -d .ddev ]; then
+  if [ -f .ddev/config.yaml ]; then
     ddev bun "$@"
   elif [ -n "$(type -P bun)" ]; then
     command bun "$@"

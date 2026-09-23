@@ -31,7 +31,7 @@ You will be asked for your **GitHub username** and **email** (used for git), the
 | **SSH setup** | `enable_ssh_setup` | SSH config for GitHub, Platform.sh/Upsun and Drupal Code, key generation and upload (see below) |
 | **mise** | `enable_mise` | Tool version manager; installs Node (LTS), Python and Bun |
 | **Runme** | `enable_runme` | Runnable markdown notebooks |
-| **DDEV wrappers** | `enable_ddev_wrappers` | `php`, `composer`, `npm`, etc. run through DDEV when a `.ddev` directory is present |
+| **DDEV wrappers** | `enable_ddev_wrappers` | `php`, `composer`, `npm`, etc. run through DDEV when a `.ddev/config.yaml` project config is present |
 | **IDP helpers** | `enable_idp_helpers` | Aliases `m` (make) and `c` (code .) |
 | **Upsun helpers** | `enable_upsun_helpers` | `pssh` — pick an Upsun project with fzf and SSH into it |
 
