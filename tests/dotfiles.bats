@@ -90,6 +90,10 @@
     grep -q "alias gp=" "${HOME}/.bashrc.d/git-aliases.sh"
 }
 
+@test "git aliases contain gbx clipboard helper" {
+    grep -q "^gbx()" "${HOME}/.bashrc.d/git-aliases.sh"
+}
+
 @test "bashrc contains clip helper and xclip is installed" {
     grep -q "^clip()" "${HOME}/.bashrc"
     grep -q '"xclip"' "${BATS_TEST_DIRNAME}/../home/.chezmoidata/packages.yaml"
